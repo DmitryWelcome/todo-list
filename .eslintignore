@@ -1,0 +1,18 @@
+# Prisma generated files
+src/generated/
+**/generated/
+**/prisma/**/*.js
+**/prisma/**/*.d.ts
+**/prisma/**/*.ts
+
+# Node modules
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+
+# Environment files
+.env*
+!.env.example 

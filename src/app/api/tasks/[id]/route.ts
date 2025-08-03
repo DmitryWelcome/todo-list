@@ -20,7 +20,6 @@ export async function PUT(
     });
 
     return NextResponse.json(task);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to update task' },
@@ -40,7 +39,6 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'Task deleted successfully' });
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to delete task' },
