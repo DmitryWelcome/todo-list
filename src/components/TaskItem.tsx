@@ -146,9 +146,14 @@ export default function TaskItem({
                   {task.description}
                 </p>
               )}
-              <p className="text-xs text-gray-400 mt-2">
-                Создано: {new Date(task.createdAt).toLocaleDateString('ru-RU')}
-              </p>
+              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-400">
+                <span>
+                  Создано: {new Date(task.createdAt).toLocaleDateString('ru-RU')}
+                </span>
+                <span>
+                  Автор: {task.user.name || task.user.email}
+                </span>
+              </div>
             </div>
           )}
         </div>

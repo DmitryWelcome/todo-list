@@ -7,9 +7,17 @@ import {
   safeLog,
   createErrorResponse,
 } from '@/lib/security';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
+    // Проверяем авторизацию
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return createErrorResponse('Unauthorized', 401);
+    }
+
     // Rate limiting
     const clientIP = getClientIP(request);
     if (!rateLimit(clientIP, 100, 60000)) {
@@ -19,6 +27,18 @@ export async function GET(request: NextRequest) {
     safeLog('GET /api/tasks - Starting request');
 
     const tasks = await prisma.task.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -34,6 +54,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Проверяем авторизацию
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return createErrorResponse('Unauthorized', 401);
+    }
+
     // Rate limiting
     const clientIP = getClientIP(request);
     if (!rateLimit(clientIP, 10, 60000)) {
@@ -66,6 +92,16 @@ export async function POST(request: NextRequest) {
       data: {
         title: sanitizedTitle,
         description: sanitizedDescription,
+        userId: session.user.id,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
       },
     });
 

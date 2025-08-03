@@ -7,12 +7,20 @@ import {
   safeLog,
   createErrorResponse,
 } from '@/lib/security';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Проверяем авторизацию
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return createErrorResponse('Unauthorized', 401);
+    }
+
     // Rate limiting
     const clientIP = getClientIP(request);
     if (!rateLimit(clientIP, 50, 60000)) {
@@ -20,16 +28,16 @@ export async function PUT(
     }
 
     const { id } = await params;
-
+    
     // Валидация ID
     if (!isValidId(id)) {
       return createErrorResponse('Invalid task ID', 400);
     }
 
     safeLog('PUT /api/tasks/[id] - Starting request');
-
+    
     const body = await request.json();
-
+    
     // Валидация входных данных
     const validationResult = updateTaskSchema.safeParse(body);
     if (!validationResult.success) {
@@ -49,6 +57,18 @@ export async function PUT(
 
     safeLog(`PUT /api/tasks/[id] - Updating task: ${id}`);
 
+    // Проверяем, что задача принадлежит пользователю
+    const existingTask = await prisma.task.findFirst({
+      where: {
+        id,
+        userId: session.user.id
+      }
+    });
+
+    if (!existingTask) {
+      return createErrorResponse('Task not found', 404);
+    }
+
     const task = await prisma.task.update({
       where: { id },
       data: {
@@ -56,6 +76,15 @@ export async function PUT(
         description: sanitizedDescription,
         completed,
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          }
+        }
+      }
     });
 
     safeLog(`PUT /api/tasks/[id] - Success, updated task: ${task.id}`);
@@ -71,6 +100,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Проверяем авторизацию
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return createErrorResponse('Unauthorized', 401);
+    }
+
     // Rate limiting
     const clientIP = getClientIP(request);
     if (!rateLimit(clientIP, 20, 60000)) {
@@ -79,7 +114,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-
+    
     // Валидация ID
     if (!isValidId(id)) {
       return createErrorResponse('Invalid task ID', 400);
@@ -87,6 +122,18 @@ export async function DELETE(
 
     safeLog('DELETE /api/tasks/[id] - Starting request');
     safeLog(`DELETE /api/tasks/[id] - Deleting task: ${id}`);
+
+    // Проверяем, что задача принадлежит пользователю
+    const existingTask = await prisma.task.findFirst({
+      where: {
+        id,
+        userId: session.user.id
+      }
+    });
+
+    if (!existingTask) {
+      return createErrorResponse('Task not found', 404);
+    }
 
     await prisma.task.delete({
       where: { id },

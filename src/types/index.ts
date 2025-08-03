@@ -1,3 +1,11 @@
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -5,6 +13,8 @@ export interface Task {
   completed: boolean;
   createdAt: Date;
   updatedAt: Date;
+  userId: string;
+  user: User;
 }
 
 export interface CreateTaskRequest {
@@ -21,4 +31,15 @@ export interface UpdateTaskRequest {
 export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
 }

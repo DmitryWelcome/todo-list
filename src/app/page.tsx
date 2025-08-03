@@ -1,26 +1,68 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSession, signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import AddTaskForm from '@/components/AddTaskForm'
 import TaskList from '@/components/TaskList'
 
 export default function Home() {
+  const { data: session, status } = useSession()
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+    }
+  }, [status, router])
 
   const handleTaskAdded = () => {
     setRefreshTrigger(prev => prev + 1)
   }
 
+  const handleSignOut = async () => {
+    await signOut({ redirect: false })
+    router.push('/auth/signin')
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Список задач
-          </h1>
-          <p className="text-gray-600">
-            Организуйте свои задачи и повышайте продуктивность
-          </p>
+        {/* Header с информацией о пользователе */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+              Список задач
+            </h1>
+            <p className="text-gray-600">
+              Организуйте свои задачи и повышайте продуктивность
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="text-right">
+              <p className="text-sm text-gray-600">Вы вошли как</p>
+              <p className="font-medium text-gray-900">{session.user.name || session.user.email}</p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Выйти
+            </button>
+          </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
