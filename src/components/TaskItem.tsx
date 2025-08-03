@@ -50,7 +50,7 @@ export default function TaskItem({ task, onTaskUpdated, onTaskDeleted }: TaskIte
   };
 
   const handleDelete = () => {
-    if (!confirm('Вы уверены, что хотите удалить эту задачу?')) return;
+    if (!confirm('Are you sure you want to delete this task?')) return;
     handleApiCall(async () => {
       await taskApi.delete(task.id);
       onTaskDeleted();
@@ -84,13 +84,13 @@ export default function TaskItem({ task, onTaskUpdated, onTaskDeleted }: TaskIte
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Название задачи"
+                placeholder="Task title"
               />
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Описание (необязательно)"
+                placeholder="Description (optional)"
                 rows={2}
               />
               <div className="flex space-x-2">
@@ -99,14 +99,14 @@ export default function TaskItem({ task, onTaskUpdated, onTaskDeleted }: TaskIte
                   disabled={isLoading}
                   className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50"
                 >
-                  Сохранить
+                  Save
                 </button>
                 <button
                   onClick={handleCancel}
                   disabled={isLoading}
                   className="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm hover:bg-gray-400 disabled:opacity-50"
                 >
-                  Отмена
+                  Cancel
                 </button>
               </div>
             </div>
@@ -123,7 +123,7 @@ export default function TaskItem({ task, onTaskUpdated, onTaskDeleted }: TaskIte
                     </p>
                   )}
                   <p className="mt-2 text-xs text-gray-500">
-                    Создатель: {task.user.name || task.user.email}
+                    Created by: {task.user.name || task.user.email}
                   </p>
                 </div>
                 <div className="flex space-x-2 ml-4">
@@ -132,14 +132,14 @@ export default function TaskItem({ task, onTaskUpdated, onTaskDeleted }: TaskIte
                     disabled={isLoading}
                     className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50"
                   >
-                    Редактировать
+                    Edit
                   </button>
                   <button
                     onClick={handleDelete}
                     disabled={isLoading}
                     className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
                   >
-                    Удалить
+                    Delete
                   </button>
                 </div>
               </div>

@@ -1,21 +1,21 @@
 import { z } from 'zod';
 
-// Базовая схема для задач
+// Base schema for tasks
 const taskBaseSchema = {
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters').trim(),
   description: z.string().max(500, 'Description must be less than 500 characters').optional(),
 };
 
-// Схема для создания задачи
+// Schema for creating a task
 export const createTaskSchema = z.object(taskBaseSchema);
 
-// Схема для обновления задачи
+// Schema for updating a task
 export const updateTaskSchema = z.object({
   ...taskBaseSchema,
   completed: z.boolean(),
 });
 
-// Функция для санитизации HTML
+// Function for HTML sanitization
 export function sanitizeHtml(input: string): string {
   return input
     .replace(/</g, '&lt;')
@@ -25,7 +25,7 @@ export function sanitizeHtml(input: string): string {
     .replace(/\//g, '&#x2F;');
 }
 
-// Функция для валидации ID
+// Function for ID validation
 export function isValidId(id: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(id) && id.length <= 50;
 } 

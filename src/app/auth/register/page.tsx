@@ -21,7 +21,7 @@ export default function Register() {
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Пароли не совпадают');
+      setError('Passwords do not match');
       setIsLoading(false);
       return;
     }
@@ -42,13 +42,13 @@ export default function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Ошибка при регистрации');
+        setError(data.error || 'Registration error');
       } else {
-        // Перенаправляем на страницу входа после успешной регистрации
+        // Redirect to sign in page after successful registration
         router.push('/auth/signin?message=Registration successful');
       }
     } catch (_error) {
-      setError('Произошла ошибка при регистрации');
+      setError('An error occurred during registration');
     } finally {
       setIsLoading(false);
     }
@@ -65,15 +65,15 @@ export default function Register() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Создать аккаунт
+          Create an account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Или{' '}
+          Or{' '}
           <Link
             href="/auth/signin"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
-            войти в существующий аккаунт
+            sign in to existing account
           </Link>
         </p>
       </div>
@@ -92,7 +92,7 @@ export default function Register() {
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-700"
               >
-                Имя
+                Name
               </label>
               <div className="mt-1">
                 <input
@@ -104,7 +104,7 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Введите ваше имя"
+                  placeholder="Enter your name"
                 />
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Введите ваш email"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function Register() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Пароль
+                Password
               </label>
               <div className="mt-1">
                 <input
@@ -148,7 +148,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Введите пароль (минимум 6 символов)"
+                  placeholder="Enter password (minimum 6 characters)"
                 />
               </div>
             </div>
@@ -158,7 +158,7 @@ export default function Register() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700"
               >
-                Подтвердите пароль
+                Confirm Password
               </label>
               <div className="mt-1">
                 <input
@@ -170,7 +170,7 @@ export default function Register() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Повторите пароль"
+                  placeholder="Repeat password"
                 />
               </div>
             </div>
@@ -181,7 +181,7 @@ export default function Register() {
                 disabled={isLoading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
+                {isLoading ? 'Registering...' : 'Register'}
               </button>
             </div>
           </form>
@@ -189,4 +189,4 @@ export default function Register() {
       </div>
     </div>
   );
-} 
+}

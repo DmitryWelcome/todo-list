@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth-utils';
 import { rateLimit, getClientIP, safeLog, createErrorResponse } from '@/lib/security';
 
-// Общие хелперы для API routes
+// Common helpers for API routes
 export async function withAuth(
   request: NextRequest,
   handler: (session: { user: { id: string; email: string; name?: string } }) => Promise<NextResponse>

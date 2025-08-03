@@ -22,7 +22,7 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
       const data = await taskApi.getAll();
       setTasks(data);
     } catch (error) {
-      setError('Ошибка при загрузке задач');
+      setError('Error loading tasks');
       console.error('Failed to fetch tasks:', error);
     } finally {
       setIsLoading(false);
@@ -57,7 +57,7 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
           onClick={fetchTasks}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
-          Попробовать снова
+          Try again
         </button>
       </div>
     );
@@ -81,8 +81,8 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Нет задач</h3>
-        <p className="text-gray-500">Добавьте свою первую задачу выше</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks</h3>
+        <p className="text-gray-500">Add your first task above</p>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
       {activeTasks.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Активные задачи ({activeTasks.length})
+            Active tasks ({activeTasks.length})
           </h2>
           <div className="space-y-3">
             {activeTasks.map((task) => (
@@ -113,7 +113,7 @@ export default function TaskList({ refreshTrigger }: TaskListProps) {
       {completedTasks.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Завершенные задачи ({completedTasks.length})
+            Completed tasks ({completedTasks.length})
           </h2>
           <div className="space-y-3">
             {completedTasks.map((task) => (

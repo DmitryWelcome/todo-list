@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Простой in-memory rate limiter (в production лучше использовать Redis)
+// Simple in-memory rate limiter (in production better to use Redis)
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 
 export function rateLimit(ip: string, limit: number = 100, windowMs: number = 60000): boolean {
@@ -21,7 +21,7 @@ export function rateLimit(ip: string, limit: number = 100, windowMs: number = 60
   return true;
 }
 
-// Функция для получения IP адреса
+// Function to get client IP address
 export function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
@@ -40,7 +40,7 @@ export function getClientIP(request: NextRequest): string {
   return 'unknown';
 }
 
-// Функция для безопасного логирования (без чувствительных данных)
+// Function for safe logging (without sensitive data)
 export function safeLog(message: string, data?: unknown): void {
   if (process.env.NODE_ENV === 'development') {
     if (data !== undefined) {
@@ -49,12 +49,12 @@ export function safeLog(message: string, data?: unknown): void {
       console.log(message);
     }
   } else {
-    // В production логируем только безопасную информацию
+    // In production log only safe information
     console.log(message);
   }
 }
 
-// Функция для создания безопасного ответа с ошибкой
+// Function to create a safe error response
 export function createErrorResponse(message: string, status: number = 500): NextResponse {
   const errorMessage = process.env.NODE_ENV === 'development' ? message : 'Internal server error';
   

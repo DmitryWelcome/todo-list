@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { updateTaskSchema, sanitizeHtml, isValidId } from '@/lib/validation';
-import { withAuth, withRateLimit, logApiCall, logApiSuccess, logApiError } from '@/lib/api-helpers';
+import {
+  withAuth,
+  withRateLimit,
+  logApiCall,
+  logApiSuccess,
+  logApiError,
+} from '@/lib/api-helpers';
 
 export async function PUT(
   request: NextRequest,
@@ -11,32 +17,41 @@ export async function PUT(
     return await withAuth(request, async (session) => {
       return await withRateLimit(request, 50, async () => {
         const { id } = await params;
-        
+
         if (!isValidId(id)) {
-          return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 });
+          return NextResponse.json(
+            { error: 'Invalid task ID' },
+            { status: 400 }
+          );
         }
 
         logApiCall('PUT', `/api/tasks/${id}`);
-        
+
         const body = await request.json();
         const validationResult = updateTaskSchema.safeParse(body);
-        
+
         if (!validationResult.success) {
           return NextResponse.json(
-            { error: 'Validation failed', details: validationResult.error.issues },
+            {
+              error: 'Validation failed',
+              details: validationResult.error.issues,
+            },
             { status: 400 }
           );
         }
 
         const { title, description, completed } = validationResult.data;
 
-        // Проверяем, что задача принадлежит пользователю
+        // Check that the task belongs to the user
         const existingTask = await prisma.task.findFirst({
-          where: { id, userId: session.user.id }
+          where: { id, userId: session.user.id },
         });
 
         if (!existingTask) {
-          return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+          return NextResponse.json(
+            { error: 'Task not found' },
+            { status: 404 }
+          );
         }
 
         const task = await prisma.task.update({
@@ -47,8 +62,8 @@ export async function PUT(
             completed,
           },
           include: {
-            user: { select: { id: true, email: true, name: true } }
-          }
+            user: { select: { id: true, email: true, name: true } },
+          },
         });
 
         logApiSuccess('PUT', `/api/tasks/${id}`, { taskId: task.id });
@@ -57,7 +72,10 @@ export async function PUT(
     });
   } catch (error) {
     logApiError('PUT', `/api/tasks/[id]`, error);
-    return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to update task' },
+      { status: 500 }
+    );
   }
 }
 
@@ -69,20 +87,26 @@ export async function DELETE(
     return await withAuth(request, async (session) => {
       return await withRateLimit(request, 50, async () => {
         const { id } = await params;
-        
+
         if (!isValidId(id)) {
-          return NextResponse.json({ error: 'Invalid task ID' }, { status: 400 });
+          return NextResponse.json(
+            { error: 'Invalid task ID' },
+            { status: 400 }
+          );
         }
 
         logApiCall('DELETE', `/api/tasks/${id}`);
 
-        // Проверяем, что задача принадлежит пользователю
+        // Check that the task belongs to the user
         const existingTask = await prisma.task.findFirst({
-          where: { id, userId: session.user.id }
+          where: { id, userId: session.user.id },
         });
 
         if (!existingTask) {
-          return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+          return NextResponse.json(
+            { error: 'Task not found' },
+            { status: 404 }
+          );
         }
 
         await prisma.task.delete({ where: { id } });
@@ -93,6 +117,9 @@ export async function DELETE(
     });
   } catch (error) {
     logApiError('DELETE', `/api/tasks/[id]`, error);
-    return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to delete task' },
+      { status: 500 }
+    );
   }
 }
