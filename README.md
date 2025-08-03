@@ -1,36 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# To-Do List App
 
-## Getting Started
+Современное приложение для управления задачами, построенное на Next.js 14, TypeScript, Tailwind CSS и PostgreSQL.
 
-First, run the development server:
+## Возможности
+
+- ✅ Добавление новых задач с описанием
+- ✅ Отметка задач как выполненных
+- ✅ Редактирование существующих задач
+- ✅ Удаление задач
+- ✅ Разделение на активные и завершенные задачи
+- ✅ Современный и отзывчивый интерфейс
+- ✅ Поддержка PostgreSQL (включая Neon)
+
+## Технологии
+
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL с Prisma ORM
+- **Deployment**: Поддержка Vercel, Neon и других платформ
+
+## Быстрый старт
+
+### 1. Установка зависимостей
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Настройка базы данных
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### Локальная разработка
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Установите PostgreSQL локально
+2. Создайте базу данных:
+   ```sql
+   CREATE DATABASE todolist;
+   ```
+3. Настройте `.env` файл:
+   ```env
+   DATABASE_URL="postgresql://username:password@localhost:5432/todolist"
+   ```
 
-## Learn More
+#### Neon (Рекомендуется для продакшена)
 
-To learn more about Next.js, take a look at the following resources:
+1. Создайте аккаунт на [Neon](https://neon.tech)
+2. Создайте новый проект
+3. Скопируйте connection string из dashboard
+4. Настройте `.env` файл:
+   ```env
+   DATABASE_URL="postgresql://username:password@ep-xxx-xxx-xxx.region.aws.neon.tech/todolist?sslmode=require"
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Настройка базы данных
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Генерация Prisma клиента
+npx prisma generate
 
-## Deploy on Vercel
+# Применение миграций
+npx prisma db push
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# (Опционально) Открыть Prisma Studio для просмотра данных
+npx prisma studio
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. Запуск приложения
+
+```bash
+# Режим разработки
+npm run dev
+
+# Продакшен сборка
+npm run build
+npm start
+```
+
+## Деплой
+
+### Vercel + Neon
+
+1. **Настройка Neon:**
+   - Создайте проект в Neon
+   - Скопируйте connection string
+   - Добавьте переменную окружения `DATABASE_URL` в Vercel
+
+2. **Деплой на Vercel:**
+   ```bash
+   npm install -g vercel
+   vercel
+   ```
+
+3. **Настройка переменных окружения в Vercel:**
+   - Перейдите в настройки проекта
+   - Добавьте `DATABASE_URL` с вашим Neon connection string
+
+### Другие платформы
+
+Приложение поддерживает деплой на любые платформы, поддерживающие Next.js:
+- Netlify
+- Railway
+- Render
+- DigitalOcean App Platform
+
+## Структура проекта
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API Routes
+│   │   └── tasks/         # CRUD операции для задач
+│   ├── globals.css        # Глобальные стили
+│   ├── layout.tsx         # Корневой layout
+│   └── page.tsx           # Главная страница
+├── components/            # React компоненты
+│   ├── AddTaskForm.tsx    # Форма добавления задач
+│   ├── TaskItem.tsx       # Компонент отдельной задачи
+│   └── TaskList.tsx       # Список задач
+└── lib/
+    └── db.ts             # Конфигурация Prisma
+prisma/
+└── schema.prisma         # Схема базы данных
+```
+
+## API Endpoints
+
+- `GET /api/tasks` - Получить все задачи
+- `POST /api/tasks` - Создать новую задачу
+- `PUT /api/tasks/[id]` - Обновить задачу
+- `DELETE /api/tasks/[id]` - Удалить задачу
+
+## Разработка
+
+### Добавление новых функций
+
+1. Обновите схему Prisma при необходимости
+2. Создайте новые API endpoints
+3. Добавьте React компоненты
+4. Обновите типы TypeScript
+
+### Линтинг и форматирование
+
+```bash
+# Проверка кода
+npm run lint
+
+# Форматирование
+npm run format
+```
+
+## Лицензия
+
+MIT
