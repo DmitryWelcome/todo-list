@@ -6,10 +6,13 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    console.log('PUT /api/tasks/[id] - Starting request');
     const body = await request.json();
     const { title, description, completed } = body;
 
     const { id } = await params;
+    console.log('PUT /api/tasks/[id] - Updating task:', id);
+
     const task = await prisma.task.update({
       where: { id },
       data: {
@@ -19,10 +22,15 @@ export async function PUT(
       },
     });
 
+    console.log('PUT /api/tasks/[id] - Success, updated task:', task.id);
     return NextResponse.json(task);
-  } catch (_error) {
+  } catch (error) {
+    console.error('PUT /api/tasks/[id] - Error:', error);
     return NextResponse.json(
-      { error: 'Failed to update task' },
+      {
+        error: 'Failed to update task',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
@@ -33,15 +41,23 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    console.log('DELETE /api/tasks/[id] - Starting request');
     const { id } = await params;
+    console.log('DELETE /api/tasks/[id] - Deleting task:', id);
+
     await prisma.task.delete({
       where: { id },
     });
 
+    console.log('DELETE /api/tasks/[id] - Success, deleted task:', id);
     return NextResponse.json({ message: 'Task deleted successfully' });
-  } catch (_error) {
+  } catch (error) {
+    console.error('DELETE /api/tasks/[id] - Error:', error);
     return NextResponse.json(
-      { error: 'Failed to delete task' },
+      {
+        error: 'Failed to delete task',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
