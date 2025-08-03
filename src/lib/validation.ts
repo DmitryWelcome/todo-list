@@ -1,29 +1,17 @@
 import { z } from 'zod';
 
-// Схема валидации для создания задачи
-export const createTaskSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Title is required')
-    .max(100, 'Title must be less than 100 characters')
-    .trim(),
-  description: z
-    .string()
-    .max(500, 'Description must be less than 500 characters')
-    .optional(),
-});
+// Базовая схема для задач
+const taskBaseSchema = {
+  title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters').trim(),
+  description: z.string().max(500, 'Description must be less than 500 characters').optional(),
+};
 
-// Схема валидации для обновления задачи
+// Схема для создания задачи
+export const createTaskSchema = z.object(taskBaseSchema);
+
+// Схема для обновления задачи
 export const updateTaskSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Title is required')
-    .max(100, 'Title must be less than 100 characters')
-    .trim(),
-  description: z
-    .string()
-    .max(500, 'Description must be less than 500 characters')
-    .optional(),
+  ...taskBaseSchema,
   completed: z.boolean(),
 });
 

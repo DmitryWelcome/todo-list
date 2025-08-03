@@ -10,37 +10,35 @@ interface TaskItemProps {
   onTaskDeleted: () => void;
 }
 
-export default function TaskItem({
-  task,
-  onTaskUpdated,
-  onTaskDeleted,
-}: TaskItemProps) {
+export default function TaskItem({ task, onTaskUpdated, onTaskDeleted }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleToggleComplete = async () => {
+  const handleApiCall = async (apiCall: () => Promise<void>) => {
     setIsLoading(true);
     try {
-      await taskApi.update(task.id, {
-        title: task.title,
-        description: task.description,
-        completed: !task.completed,
-      });
-      onTaskUpdated();
+      await apiCall();
     } catch (error) {
-      console.error('Failed to update task:', error);
+      console.error('API call failed:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSave = async () => {
-    if (!title.trim()) return;
+  const handleToggleComplete = () => handleApiCall(async () => {
+    await taskApi.update(task.id, {
+      title: task.title,
+      description: task.description,
+      completed: !task.completed,
+    });
+    onTaskUpdated();
+  });
 
-    setIsLoading(true);
-    try {
+  const handleSave = () => {
+    if (!title.trim()) return;
+    handleApiCall(async () => {
       await taskApi.update(task.id, {
         title: title.trim(),
         description: description.trim(),
@@ -48,25 +46,15 @@ export default function TaskItem({
       });
       setIsEditing(false);
       onTaskUpdated();
-    } catch (error) {
-      console.error('Failed to update task:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!confirm('Вы уверены, что хотите удалить эту задачу?')) return;
-
-    setIsLoading(true);
-    try {
+    handleApiCall(async () => {
       await taskApi.delete(task.id);
       onTaskDeleted();
-    } catch (error) {
-      console.error('Failed to delete task:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   const handleCancel = () => {
@@ -76,11 +64,9 @@ export default function TaskItem({
   };
 
   return (
-    <div
-      className={`p-4 bg-white rounded-lg shadow-md border-l-4 ${
-        task.completed ? 'border-green-500 bg-green-50' : 'border-blue-500'
-      }`}
-    >
+    <div className={`p-4 bg-white rounded-lg shadow-md border-l-4 ${
+      task.completed ? 'border-green-500 bg-green-50' : 'border-blue-500'
+    }`}>
       <div className="flex items-start space-x-3">
         <input
           type="checkbox"
@@ -110,15 +96,15 @@ export default function TaskItem({
               <div className="flex space-x-2">
                 <button
                   onClick={handleSave}
-                  disabled={isLoading || !title.trim()}
-                  className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
+                  disabled={isLoading}
+                  className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50"
                 >
                   Сохранить
                 </button>
                 <button
                   onClick={handleCancel}
                   disabled={isLoading}
-                  className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 disabled:opacity-50"
+                  className="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm hover:bg-gray-400 disabled:opacity-50"
                 >
                   Отмена
                 </button>
@@ -126,82 +112,40 @@ export default function TaskItem({
             </div>
           ) : (
             <div>
-              <h3
-                className={`text-sm font-medium ${
-                  task.completed
-                    ? 'line-through text-gray-500'
-                    : 'text-gray-900'
-                }`}
-              >
-                {task.title}
-              </h3>
-              {task.description && (
-                <p
-                  className={`text-sm mt-1 ${
-                    task.completed
-                      ? 'line-through text-gray-400'
-                      : 'text-gray-600'
-                  }`}
-                >
-                  {task.description}
-                </p>
-              )}
-              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-400">
-                <span>
-                  Создано: {new Date(task.createdAt).toLocaleDateString('ru-RU')}
-                </span>
-                <span>
-                  Автор: {task.user.name || task.user.email}
-                </span>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className={`text-lg font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                    {task.title}
+                  </h3>
+                  {task.description && (
+                    <p className={`mt-1 text-sm ${task.completed ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {task.description}
+                    </p>
+                  )}
+                  <p className="mt-2 text-xs text-gray-500">
+                    Создатель: {task.user.name || task.user.email}
+                  </p>
+                </div>
+                <div className="flex space-x-2 ml-4">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    disabled={isLoading}
+                    className="text-blue-600 hover:text-blue-800 text-sm disabled:opacity-50"
+                  >
+                    Редактировать
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isLoading}
+                    className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                  >
+                    Удалить
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
-
-        {!isEditing && (
-          <div className="flex space-x-1">
-            <button
-              onClick={() => setIsEditing(true)}
-              disabled={isLoading}
-              className="p-1 text-gray-400 hover:text-blue-600 disabled:opacity-50"
-              title="Редактировать"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={isLoading}
-              className="p-1 text-gray-400 hover:text-red-600 disabled:opacity-50"
-              title="Удалить"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
