@@ -1,49 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { createTaskSchema, sanitizeHtml } from '@/lib/validation';
+import {
+  rateLimit,
+  getClientIP,
+  safeLog,
+  createErrorResponse,
+} from '@/lib/security';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    console.log('GET /api/tasks - Starting request');
+    // Rate limiting
+    const clientIP = getClientIP(request);
+    if (!rateLimit(clientIP, 100, 60000)) {
+      return createErrorResponse('Too many requests', 429);
+    }
+
+    safeLog('GET /api/tasks - Starting request');
+
     const tasks = await prisma.task.findMany({
       orderBy: {
         createdAt: 'desc',
       },
     });
-    console.log('GET /api/tasks - Success, found', tasks.length, 'tasks');
+
+    safeLog(`GET /api/tasks - Success, found ${tasks.length} tasks`);
     return NextResponse.json(tasks);
   } catch (error) {
-    console.error('GET /api/tasks - Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tasks', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    safeLog('GET /api/tasks - Error:', error);
+    return createErrorResponse('Failed to fetch tasks');
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('POST /api/tasks - Starting request');
-    const body = await request.json();
-    const { title, description } = body;
-
-    if (!title) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+    // Rate limiting
+    const clientIP = getClientIP(request);
+    if (!rateLimit(clientIP, 10, 60000)) {
+      // Более строгий лимит для POST
+      return createErrorResponse('Too many requests', 429);
     }
+
+    safeLog('POST /api/tasks - Starting request');
+
+    const body = await request.json();
+
+    // Валидация входных данных
+    const validationResult = createTaskSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: validationResult.error.issues },
+        { status: 400 }
+      );
+    }
+
+    const { title, description } = validationResult.data;
+
+    // Санитизация данных
+    const sanitizedTitle = sanitizeHtml(title);
+    const sanitizedDescription = description
+      ? sanitizeHtml(description)
+      : undefined;
 
     const task = await prisma.task.create({
       data: {
-        title,
-        description,
+        title: sanitizedTitle,
+        description: sanitizedDescription,
       },
     });
 
-    console.log('POST /api/tasks - Success, created task:', task.id);
+    safeLog(`POST /api/tasks - Success, created task: ${task.id}`);
     return NextResponse.json(task, { status: 201 });
   } catch (error) {
-    console.error('POST /api/tasks - Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create task', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    safeLog('POST /api/tasks - Error:', error);
+    return createErrorResponse('Failed to create task');
   }
 }
